@@ -35,7 +35,6 @@ jobs:
         npm install @capacitor/cli
         npx cap sync android
 
-    # THIS IS THE NEW STEP YOU NEED TO ADD
     - name: Grant execute permission to gradlew
       run: chmod +x android/gradlew
 
