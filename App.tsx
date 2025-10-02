@@ -104,6 +104,29 @@ const App: React.FC = () => {
     });
   }, []);
   
+    const handleDurationChange = useCallback((songId: string, duration: number) => {
+        setSongs(currentSongs => {
+            let songToUpdate: Song | undefined;
+            const updatedSongs = currentSongs.map(song => {
+                // Update duration only if it was 0 before, to avoid unnecessary updates
+                if (song.id === songId && song.duration === 0) {
+                    songToUpdate = { ...song, duration };
+                    return songToUpdate;
+                }
+                return song;
+            });
+
+            if (songToUpdate) {
+                updateSongInDB(songToUpdate).catch(error => {
+                    console.error("Failed to update duration in DB:", error);
+                });
+                return updatedSongs; // Return the new array if an update happened
+            }
+            
+            return currentSongs; // Return the original array if no update
+        });
+    }, []);
+
   const displayedSongs = useMemo(() => {
     const filteredSongs = currentView === 'favorites' ? songs.filter(s => s.isFavorite) : songs;
     
@@ -122,7 +145,7 @@ const App: React.FC = () => {
     });
   }, [songs, sortCriteria, currentView]);
 
-  const player = useMusicPlayer(displayedSongs, handleIncrementPlayCount);
+  const player = useMusicPlayer(displayedSongs, handleIncrementPlayCount, handleDurationChange);
 
   // Sync player index if sorting or filtering changes while a song is playing
   useEffect(() => {
