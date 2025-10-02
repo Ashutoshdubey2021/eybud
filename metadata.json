@@ -1,0 +1,5 @@
+{
+  "name": "EYBUD Music Player",
+  "description": "An offline-first, Spotify-like music player for your local MP3 files. It ranks songs by play count and features a dynamic UI.",
+  "requestFramePermissions": []
+}
