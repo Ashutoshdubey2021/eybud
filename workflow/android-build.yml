@@ -1,16 +1,54 @@
+name: Build Android APK
 
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
 
-const rootElement = document.getElementById('root');
-if (!rootElement) {
-  throw new Error("Could not find root element to mount to");
-}
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-const root = ReactDOM.createRoot(rootElement);
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '21'
+
+    - name: Install web dependencies
+      run: npm ci
+      
+    - name: Build web app
+      run: npm run build
+
+    - name: Sync web assets with Capacitor
+      run: |
+        npm install @capacitor/cli
+        npx cap sync android
+
+    # THIS IS THE NEW STEP TO ADD
+    - name: Generate App Icons and Splash Screens
+      run: |
+        npm install @capacitor/assets
+        npx capacitor-assets generate --iconBackgroundColor '#FFFFFF' --splashBackgroundColor '#FFFFFF'
+
+    - name: Grant execute permission to gradlew
+      run: chmod +x android/gradlew
+
+    - name: Build debug APK
+      run: ./android/gradlew -p android assembleDebug
+
+    - name: Upload APK as an artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-debug.apk
+        path: android/app/build/outputs/apk/debug/app-debug.apk
