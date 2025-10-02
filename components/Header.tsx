@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 
 interface HeaderProps {
@@ -25,13 +26,14 @@ const FireIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
+// FIX: Completed the PlusIcon component which was cut off.
 const PlusIcon: React.FC<{ className?: string }> = ({ className }) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
         <path fillRule="evenodd" d="M12 3.75a.75.75 0 01.75.75v6.75h6.75a.75.75 0 010 1.5h-6.75v6.75a.75.75 0 01-1.5 0v-6.75H4.5a.75.75 0 010-1.5h6.75V4.5a.75.75 0 01.75-.75z" clipRule="evenodd" />
     </svg>
 );
 
-
+// FIX: Implemented the Header component and added a default export to fix the import error in App.tsx.
 const Header: React.FC<HeaderProps> = ({ onFilesChange }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -40,26 +42,24 @@ const Header: React.FC<HeaderProps> = ({ onFilesChange }) => {
   };
 
   return (
-    <header className="flex-shrink-0 bg-transparent p-4 flex justify-between items-center z-10">
-      <div className="flex items-center gap-3">
+    <header className="relative z-20 flex-shrink-0 flex items-center justify-between p-4 md:px-8">
+      <div className="flex items-center gap-2">
         <FireIcon className="w-8 h-8 text-orange-500" />
-        <h1 className="text-2xl font-bold tracking-wider text-white">EYBUD</h1>
+        <h1 className="text-xl font-bold tracking-tight text-white">EYEBUD</h1>
       </div>
       <div>
         <input
           type="file"
-          accept="audio/mpeg,.mp3,audio/*"
-          multiple
-          onChange={onFilesChange}
           ref={fileInputRef}
+          onChange={onFilesChange}
           className="hidden"
-          id="file-upload"
-          aria-hidden="true"
+          accept="audio/*,.mp3"
+          multiple
         />
         <button
           onClick={handleAddClick}
+          className="flex items-center justify-center w-10 h-10 bg-gray-800/80 hover:bg-gray-700/70 rounded-full transition-colors"
           aria-label="Add songs"
-          className="bg-orange-600/80 hover:bg-orange-500 text-white font-semibold w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300"
         >
           <PlusIcon className="w-6 h-6" />
         </button>
