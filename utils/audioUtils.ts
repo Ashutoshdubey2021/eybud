@@ -15,10 +15,6 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
 
 export const readSongMetadata = (file: File): Promise<Song | null> => {
   return new Promise((resolve) => {
-    // Create a temporary URL just for reading the duration, but don't store it.
-    const tempUrl = URL.createObjectURL(file);
-    const audio = new Audio(tempUrl);
-
     const processMetadata = (tags: any = {}) => {
       const { title, artist, album, picture } = tags;
       
@@ -27,29 +23,20 @@ export const readSongMetadata = (file: File): Promise<Song | null> => {
         const base64String = arrayBufferToBase64(picture.data);
         artwork = `data:${picture.format};base64,${base64String}`;
       }
-
-      audio.addEventListener('loadedmetadata', () => {
-          const song: Omit<Song, 'fileUrl'> = {
-            id: `${file.name}-${file.lastModified}-${file.size}`,
-            file: file,
-            title: title || file.name.replace('.mp3', ''),
-            artist: artist || 'Unknown Artist',
-            album: album || 'Unknown Album',
-            artwork,
-            playCount: 0,
-            duration: audio.duration,
-            dateAdded: Date.now(),
-            isFavorite: false,
-          };
-          URL.revokeObjectURL(tempUrl); // Clean up the temporary URL immediately
-          resolve(song as Song);
-      });
-
-      audio.addEventListener('error', (e) => {
-        console.error("Error loading audio duration", e);
-        URL.revokeObjectURL(tempUrl);
-        resolve(null);
-      });
+      
+      const song: Song = {
+        id: `${file.name}-${file.lastModified}-${file.size}`,
+        file: file,
+        title: title || file.name.replace(/\.mp3$/i, ''),
+        artist: artist || 'Unknown Artist',
+        album: album || 'Unknown Album',
+        artwork,
+        playCount: 0,
+        duration: 0, // Duration is unknown initially, will be updated on first play
+        dateAdded: Date.now(),
+        isFavorite: false,
+      };
+      resolve(song);
     };
 
     jsmediatags.read(file, {
@@ -57,7 +44,7 @@ export const readSongMetadata = (file: File): Promise<Song | null> => {
         processMetadata(tag.tags);
       },
       onError: (error: any) => {
-        console.warn(`Could not read MP3 tags for file "${file.name}". It may not contain them or the format is unsupported.`, error);
+        console.warn(`Could not read MP3 tags for file "${file.name}". It may not contain them.`, error);
         // Fallback for files without tags
         processMetadata();
       }
