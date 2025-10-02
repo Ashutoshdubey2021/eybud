@@ -40,8 +40,9 @@ const App: React.FC = () => {
     const newSongs: Song[] = [...songs];
     const existingSongIds = new Set(songs.map(s => s.id));
 
-    for (const file of files) {
-      if (file.type === 'audio/mpeg') {
+    for (const file of Array.from(files)) {
+      // FIX: Changed check from file.type to file extension for better mobile compatibility
+      if (file.name.toLowerCase().endsWith('.mp3')) {
         const songData = await readSongMetadata(file);
         if (songData && !existingSongIds.has(songData.id)) {
           newSongs.push(songData);
