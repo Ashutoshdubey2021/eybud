@@ -48,7 +48,7 @@ const Header: React.FC<HeaderProps> = ({ onFilesChange }) => {
       <div>
         <input
           type="file"
-          accept=".mp3"
+          accept="audio/mpeg,.mp3,audio/*"
           multiple
           onChange={onFilesChange}
           ref={fileInputRef}
