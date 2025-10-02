@@ -1,7 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Song, RepeatMode } from '../types';
 
-export const useMusicPlayer = (playlist: Song[], onPlayCountIncrement: (songId: string) => void) => {
+export const useMusicPlayer = (
+    playlist: Song[], 
+    onPlayCountIncrement: (songId: string) => void,
+    onDurationChange: (songId: string, duration: number) => void
+) => {
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTrackIndex, setCurrentTrackIndex] = useState<number | null>(null);
@@ -119,7 +123,12 @@ export const useMusicPlayer = (playlist: Song[], onPlayCountIncrement: (songId: 
     if (!audio) return;
     
     const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
-    const handleLoadedMetadata = () => setDuration(audio.duration);
+    const handleLoadedMetadata = () => {
+        setDuration(audio.duration);
+        if (currentTrack && audio.duration) {
+            onDurationChange(currentTrack.id, audio.duration);
+        }
+    };
     const handleEnded = () => playNext();
 
     audio.addEventListener('timeupdate', handleTimeUpdate);
@@ -131,7 +140,7 @@ export const useMusicPlayer = (playlist: Song[], onPlayCountIncrement: (songId: 
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('ended', handleEnded);
     };
-  }, [audio, playNext]);
+  }, [audio, playNext, currentTrack, onDurationChange]);
 
 
   const playPrev = useCallback(() => {
